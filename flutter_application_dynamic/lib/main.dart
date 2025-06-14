@@ -46,6 +46,10 @@ int hardEndFirstNumber = 0;
 int hardStartSecondNumber = 0;
 int hardEndSecondNumber = 0;
 int maxCategories=0;
+int imgsizew = 0;
+int imgsizeh = 0;
+int hint1sizew=0;
+int hint1sizeh=0;
 var startendnumbers=[];
 var button1String = "";
 var button2String = "";
@@ -152,9 +156,13 @@ class MyApp extends StatefulWidget {
           totalCurrentDirCount = gameDetailsList[gamePicked].learn.normal[0].endNumber - gameDetailsList[0].learn.normal[0].startNumber + 1;
           totalDirectories = gameDetailsList[gamePicked].learn.normal.length;
           hint1Exists = gameDetailsList[gamePicked].learn.hint1.isNotEmpty;
+          imgsizew = gameDetailsList[gamePicked].learn.Imagewidth;
+          imgsizeh = gameDetailsList[gamePicked].learn.Imageheight;
           if (hint1Exists) {
             hint1Directory = gameDetailsList[gamePicked].learn.hint1[0].directory;
             hint1FileName = '$hint1Directory/H$currentFileNumber.jpg';
+            hint1sizew = gameDetailsList[gamePicked].learn.Hint1width;
+            hint1sizeh = gameDetailsList[gamePicked].learn.Hint1height;
           }
           hint2Exists = gameDetailsList[gamePicked].learn.hint2.isNotEmpty;
           if (hint2Exists) {
@@ -617,6 +625,10 @@ class PlaySettings {
 
 class LearnSettings {
   String gameType;
+  int Imagewidth;
+  int Imageheight;
+  int Hint1width;
+  int Hint1height;
   Map<String, dynamic> button;
   List<LearnItem> normal;
   List<LearnItem> hint1;
@@ -629,6 +641,10 @@ class LearnSettings {
     required this.normal,
     required this.hint1,
     required this.hint2,
+    required this.Imagewidth,
+    required this.Imageheight,
+    required this.Hint1width,
+    required this.Hint1height,
   });
 
   factory LearnSettings.fromJson(Map<String, dynamic> json) {
@@ -638,6 +654,10 @@ class LearnSettings {
 
     return LearnSettings(
       gameType: json['GameType'],
+      Imagewidth: json['Imagewidth'],
+      Imageheight: json['Imageheight'],
+      Hint1width: json['Hint1width'],
+      Hint1height: json['Hint1height'],
       button: json['Button'],
       normal: normalList.map((item) => LearnItem.fromJson(item)).toList(),
       hint1: hint1List.map((item) => LearnItem.fromJson(item)).toList(),
@@ -816,6 +836,31 @@ void _playAudio(String test) async {
       }
     });
   }
+  void restartToFirstCard() {
+    setState(() {
+      currentDirectoryIndex = 0;
+      startFileNumber = currentFileNumber = gameDetailsList[gamePicked].learn.normal[0].startNumber;
+      currentDir = gameDetailsList[gamePicked].learn.normal[0].directory;
+      texts = currentText = gameDetailsList[gamePicked].learn.normal[0].name;
+      endFileNumber = gameDetailsList[gamePicked].learn.normal[0].endNumber;
+      totalCurrentDirCount = endFileNumber - startFileNumber + 1;
+      hint1Exists = gameDetailsList[gamePicked].learn.hint1.isNotEmpty;
+      hint2Exists = gameDetailsList[gamePicked].learn.hint2.isNotEmpty;
+
+      currentFileName = '$currentDir/$currentFileNumber.jpg';
+
+      if (hint1Exists) {
+        hint1Directory = gameDetailsList[gamePicked].learn.hint1[0].directory;
+        hint1FileName = '$hint1Directory/H$currentFileNumber.jpg';
+      }
+      if (hint2Exists) {
+        hint2Directory = gameDetailsList[gamePicked].learn.hint2[0].directory;
+        hint2FileName = '$hint2Directory/H$currentFileNumber.m4a';
+        _playAudio(hint2FileName);
+      }
+    });
+  }
+
 
   /*void hint1Card() {
     setState(() {
@@ -846,7 +891,11 @@ void _playAudio(String test) async {
     //_playAudio();
     //kn2 return Scaffold(
     return ResponsiveBuilder(builder: (context, sizingInformation) {
-      double imageSize = sizingInformation.isMobile ? 150 : 300;
+      double ih = sizingInformation.isMobile ? imgsizeh.toDouble()/2 : imgsizeh.toDouble();
+      double iw = sizingInformation.isMobile ? imgsizew.toDouble()/2 : imgsizew.toDouble();
+      double h1w = sizingInformation.isMobile ? hint1sizew.toDouble()/2 : hint1sizew.toDouble();
+      double h1h = sizingInformation.isMobile ? hint1sizeh.toDouble()/2 : hint1sizeh.toDouble();
+      //double imageSize = sizingInformation.isMobile ? 150 : 300;
       return Scaffold(
         appBar: AppBar(title: Text('Learn')),
         body: Center(
@@ -867,24 +916,24 @@ void _playAudio(String test) async {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
               Row (
                 mainAxisAlignment: MainAxisAlignment.center,
                 children:[
-                  const SizedBox(height: 10),
                   Image.asset(
                     //flashcards[currentIndex],
                     currentFileName,
-                    height: imageSize, //300,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.normal[currentDirectoryIndex].height!.toDouble(): 300,
-                    width: imageSize, //300,//(gameDetailsList.isNotEmpty) ? gameDetailsList[gamePicked].learn.normal[currentDirectoryIndex].width!.toDouble(): 300, 
+                    height: ih, //300,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.normal[currentDirectoryIndex].height!.toDouble(): 300,
+                    width: iw, //300,//(gameDetailsList.isNotEmpty) ? gameDetailsList[gamePicked].learn.normal[currentDirectoryIndex].width!.toDouble(): 300, 
                     fit: BoxFit.cover,
                   ),
                 Padding (padding: const EdgeInsets.only(right:20.0),),
-                  SizedBox(height: 10, width: imageSize/3),
+                  SizedBox(height: 20, width: ih/3),
                   Image.asset(
                     //flashcardsHint1[currentIndex],
                     hint1FileName,
-                    height: imageSize, //250,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.hint1[currentDirectoryIndex].height!.toDouble(): 200,
-                    width: imageSize, //500,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.hint1[currentDirectoryIndex].width!.toDouble(): 350, 
+                    height: h1h, //250,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.hint1[currentDirectoryIndex].height!.toDouble(): 200,
+                    width: h1w, //500,//(gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.hint1[currentDirectoryIndex].width!.toDouble(): 350, 
                     fit: BoxFit.cover,
                   ),
                   //Padding (padding: const EdgeInsets.only(right:20.0),),
@@ -912,18 +961,25 @@ void _playAudio(String test) async {
                   ),*/
                 ],
               ), //Row
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: prevCard, 
+                    onPressed: (currentDirectoryIndex == 0 && currentFileNumber == gameDetailsList[gamePicked].learn.normal[0].startNumber)? null: prevCard,
                     child: Text((gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.button['Back']['Name']: 'Previous'),
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: nextCard,
-                    child: Text(gameDetailsList.isNotEmpty? gameDetailsList[gamePicked].learn.button['Next']['Name']:'Next'),
+                    onPressed: (currentDirectoryIndex == totalDirectories - 1 && currentFileNumber == gameDetailsList[gamePicked].learn.normal[totalDirectories - 1].endNumber)? null: nextCard,
+                    child: Text((gameDetailsList.isNotEmpty)? gameDetailsList[gamePicked].learn.button['Next']['Name']: 'Next'),
                   ),
+                  const SizedBox(width: 40),
+                  if (currentDirectoryIndex == totalDirectories - 1 && currentFileNumber == gameDetailsList[gamePicked].learn.normal[totalDirectories - 1].endNumber)
+                    ElevatedButton(
+                      onPressed: restartToFirstCard,
+                      child: Text('Restart'),
+                    ),
                 ],
               ),
             ], //children
@@ -1027,17 +1083,20 @@ class SetQuestionCountPageState extends State<SetQuestionCountPage> {
                   children: [
                     SizedBox(width: ssize/3),
                     Flexible(
-                      child:SizedBox(
-                        width:tsize,
-                        height: fsize,
-                        child: TextField(
-                          controller: _controller,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            //labelText: 'Enter #questions from 6 to 19, default #question-count=10',
-                            labelText: gameDetailsList[gamePicked].play.numberOfQuestions['QuestionHint'],
-                            errorText: errorMessage.isEmpty ? null : errorMessage,
-                            border: OutlineInputBorder(),
+                      child: SizedBox(
+                        width: tsize,
+                        height: fsize + 24,
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: TextField(
+                            controller: _controller,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              labelText: gameDetailsList[gamePicked].play.numberOfQuestions['QuestionHint'],
+                              errorText: errorMessage.isEmpty ? null : errorMessage,
+                              helperText: errorMessage.isEmpty ? ' ' : null, // Reserve space
+                              border: const OutlineInputBorder(),
+                            ),
                           ),
                         ),
                       ),
@@ -2071,6 +2130,32 @@ class EndPage extends StatelessWidget {
     } */
 
     var percent=((1-((appState.inanswered.length)/appState.allQuestionsList.length))*100).ceil();
+    var message1="";
+    var message2="";
+    var message3="";
+    if (percent==100){
+      message3="Awesome!!";
+    }
+    else if (percent>=80){
+      message1="Don’t worry, mistakes help you learn!";
+      message2="Look at the correct answers below to learn from your incorrect responses.";
+      message3="Great Job!!";
+    }
+    else if (percent>=70){
+      message1="Don’t worry, mistakes help you learn!";
+      message2="Look at the correct answers below to learn from your incorrect responses.";
+      message3="Good Job!!";
+    }
+    else if (percent>=60){
+      message3="Nice Job!!";
+      message1="Don’t worry, mistakes help you learn!";
+      message2="Look at the correct answers below to learn from your incorrect responses.";
+    }
+    else{
+      message1="Don’t worry, mistakes help you learn!";
+      message2="Look at the correct answers below to learn from your incorrect responses.";
+      message3="Try using Learn Mode and play again when you're ready!";
+    }
     //appState.Restart();
     /*return ListView(
       children: [
@@ -2083,164 +2168,72 @@ class EndPage extends StatelessWidget {
           ),
       ],
     );
-    */return ResponsiveBuilder(builder: (context, sizingInformation) {
+    */
+    return ResponsiveBuilder(builder: (context, sizingInformation) {
       double imageSize = sizingInformation.isMobile ? 60 : 300;
       return Padding(
-      padding: EdgeInsets.all(16.0), // Adds padding around the entire page
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'You got ${appState.allQuestionsList.length-appState.inanswered.length} questions right out of ${appState.allQuestionsList.length} questions.\n'
-            'You got $percent% of the answers right. Good Job!!',
-            style: TextStyle(fontSize: 16), // Adjust font size if needed
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 20), // Small gap between text and images
-          /* Text(
-            'Here are the answers you said that were consonents but actually are vowels:',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-          ), */
-          /* Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, 
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: missing.length,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Image.asset('assets/images/${missing[index]}.jpg'),
-                    ),
-                    Text(
-                      "Correct Answer: Vowel \n" "Your Answer: Consonent",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                );
-              },
+        padding: EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Text(
+              'You got ${appState.allQuestionsList.length - appState.inanswered.length} out of ${appState.allQuestionsList.length} questions correct ($percent%).\n'
+              '$message1 \n'
+              '$message2 \n'
+              '$message3',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
             ),
-          ),
-          /* const SizedBox(height: 20),
-          Text(
-            'Here are the answers you said that were vowels but actually are consonents:',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),
-          ), */
-          Expanded(
-            child: GridView.builder(
+            const SizedBox(height: 20),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(), 
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, 
+                crossAxisCount: 3,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
+                childAspectRatio: 0.75,
               ),
-              itemCount: cmissing.length,
+              itemCount: appState.inanswered.length,
               itemBuilder: (context, index) {
-                //return Image.asset('assets/images/${cmissing[index]}.jpg');
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Image.asset('assets/images/${cmissing[index]}.jpg'),
-                    ),
-                    Text(
-                      "Correct Answer: Consonent \n" "Your Answer: Vowel",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),*/
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3, 
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemCount: appState.inanswered.length, // Total incorrect answers
-              itemBuilder: (context, index) {
-                //String item;
-                /* String category;
-                String categorys;
-                var button1String = gameDetailsList[gamePicked].play.playModes['Button']['1']['Name'];
-                var button2String = gameDetailsList[gamePicked].play.playModes['Button']['2']['Name'];
-
-                // Merge the two lists
-                if (index < missing.length) {
-                  item = missing[index]; 
-                  category = button1String;//"Vowel"; 
-                  categorys = button2String;//"Consonant";
-                } else {
-                  item = cmissing[index - missing.length]; 
-                  category = button2String;//"Consonant"; 
-                  categorys = button1String;//"Vowel"; 
-                } */
-                print("abs");
-                String Userans=(appState.inanswered[index][0]).toString();
-                String Corrans=(appState.inanswered[index][1]).toString();
-                print("bbs");
+                String userAns = appState.inanswered[index][0].toString();
+                String corrAns = appState.inanswered[index][1].toString();
                 int currentNumber = appState.inanswered[index][2];
-                var directory = "";
-                /* if (currentNumber >= easyStartFirstNumber && currentNumber <= easyEndFirstNumber) {
-                  directory = gameDetailsList[gamePicked].play.playModes['Easy'][0]['Directory'];
-                } else if (currentNumber >= easyStartSecondNumber && currentNumber <= easyEndSecondNumber) {
-                  directory = gameDetailsList[gamePicked].play.playModes['Easy'][1]['Directory'];
-                } else if (currentNumber >= hardStartFirstNumber && currentNumber <= hardEndFirstNumber) {
-                  directory = gameDetailsList[gamePicked].play.playModes['Hard'][0]['Directory'];
-                } else if (currentNumber >= hardStartSecondNumber && currentNumber <= hardEndSecondNumber) {
-                  directory = gameDetailsList[gamePicked].play.playModes['Hard'][1]['Directory'];
-                } */
-                print("num");
-                print(maxCategories);
-                print(currentNumber);
-                print(startendnumbers);
-                for(int i=0;i<maxCategories;i++){
-                    if (currentNumber >= startendnumbers[2*i] && currentNumber <= startendnumbers[2*i+1]) {
-                      print(i);
-                      directory = gameDetailsList[gamePicked].play.playModes['Easy'][i]['Directory'];
-                    }
-                }
-                for(int i=maxCategories;i<2*maxCategories;i++){
-                  print("inside");
-                  print(startendnumbers[2*i]);
-                  print("s");
-                  print(startendnumbers[2*i+1]);
-                  if (currentNumber >= startendnumbers[2*i] && currentNumber <= startendnumbers[2*i+1]) {
-                    directory = gameDetailsList[gamePicked].play.playModes['Hard'][i-maxCategories]['Directory'];
+
+                String directory = '';
+                for (int i = 0; i < maxCategories; i++) {
+                  if (currentNumber >= startendnumbers[2 * i] &&
+                      currentNumber <= startendnumbers[2 * i + 1]) {
+                    directory = gameDetailsList[gamePicked].play.playModes['Easy'][i]['Directory'];
                   }
                 }
-                print("done");
+                for (int i = maxCategories; i < 2 * maxCategories; i++) {
+                  if (currentNumber >= startendnumbers[2 * i] &&
+                      currentNumber <= startendnumbers[2 * i + 1]) {
+                    directory = gameDetailsList[gamePicked].play.playModes['Hard'][i - maxCategories]['Directory'];
+                  }
+                }
+
                 return Column(
                   children: [
-                    /* Expanded(
-                      child: Image.asset('$directory/$currentNumber.jpg',height: imageSize, 
-                    width: imageSize,) 
-                    ),*/
                     Image.asset(
                       '$directory/$currentNumber.jpg',
                       height: imageSize,
                       width: imageSize,
-                      fit: BoxFit.contain, // or BoxFit.cover based on need
+                      fit: BoxFit.contain,
                     ),
                     Text(
-                      "\nCorrect Answer: $Corrans \n""Your Answer: $Userans",
+                      "\n✅ Correct Answer: $corrAns\n❌ Your Answer: $userAns",
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height:20),
+                    SizedBox(height: 20),
                   ],
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
-  });
+          ],
+        ),
+      );
+    });
   }
 }

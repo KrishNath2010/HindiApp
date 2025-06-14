@@ -2,8 +2,8 @@
     "games": 
     [
         {
-            "Name": "numbers",
-            "Directory": "numbers"
+            "Name": "vowel-consonant",
+            "Directory": "vowel-consonant"
         }
     ]
 }

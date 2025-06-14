@@ -260,6 +260,10 @@
     "Learn": 
     {
         "GameType": "Button-Click",
+        "Imageheight": 350,
+        "Hint1height": 150,
+        "Imagewidth": 350,
+        "Hint1width": 250,
         "Button": 
         {
             "Back": 
